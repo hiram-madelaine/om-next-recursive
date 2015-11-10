@@ -7,6 +7,14 @@
 
 (enable-console-print!)
 
+;________________________________________________________________________
+;                                                                        |
+; An attempt to display and mutate recursive data hold into DataScript   |
+; Works with [org.omcljs/om "1.0.0-alpha19-SNAPSHOT"] as of 2015-11-09   |
+;________________________________________________________________________|
+
+
+
 ;__________________________________________________________
 ;                                                          |
 ;                DB                                        |
@@ -18,6 +26,7 @@
                           :task/creator {:db/valueType :db.type/ref}}))
 
 
+
 (d/transact! conn [{:db/id         -1
                     :task/title    "Om-Next Beta version"
                     :task/status :wip
@@ -25,8 +34,12 @@
                                      :task/title    "Handle recursive query"
                                      :task/status :open
                                      :task/children [{:db/id -3
-                                                      :task/title "Think a little more"
-                                                      :task/status :open}]}]}])
+                                                      :task/title "Think a little harder"
+                                                      :task/status :open}]}
+                                    {:db/id -4
+                                     :task/title "Hammock a little more"
+                                     :task/status :open}]}])
+
 
 ;__________________________________________________________
 ;                                                          |
@@ -39,16 +52,15 @@
 (defui TaskUI
        static om/IQuery
        (query [this]
-              [:db/id :task/title :task/status :task/children])
+              '[:db/id :task/title :task/status {:task/children ...}]);Magic appends with the recursice notation
        Object
        (render [this]
-               (let [{:keys [db/id task/title task/status task/children] :as task} (om/props this)
-                     idty (om/ident this task)]
+               (let [{:keys [db/id task/title task/status task/children] :as task} (om/props this)]
                  (dom/div #js {:style #js {:border "1px solid grey"
                                            :borderRadius "4px"
                                            :margin "3px"
                                            :padding "3px"}}
-                          (dom/h3 #js {}
+                          (dom/label #js {:style #js {:display "flex"}}
                                   (dom/button #js {:onClick #(om/transact! this `[(task/close ~task)])} "x")
                                   (str (name status) " - " title))
                           (apply dom/div nil (map task-ui children))))))
@@ -82,12 +94,6 @@
                  :where
                  [?e :task/title]]
                (d/db state) selector)})
-
-
-#_(defmethod read :tasks/task-by-id
-  [{:keys [state selector]} key {:keys [db/id] :as params}]
-  {:value #(d/q '[:find (pull ?e [])])})
-
 
 
 ;__________________________________________________________
@@ -125,4 +131,6 @@
 (om/add-root! reconciler TasksList (gdom/getElement "app"))
 
 
-(pprint (-> (get-in reconciler [:config :indexer])))
+(comment
+  (pprint (-> (get-in reconciler [:config :indexer]))))
+
