@@ -9,7 +9,7 @@
 
 ;________________________________________________________________________
 ;                                                                        |
-;  An attempt to display and mutate recursive data hold into DataScript  |
+; An attempt to display and mutate recursive data hold into DataScript   |
 ; Works with [org.omcljs/om "1.0.0-alpha19-SNAPSHOT"] as of 2015-11-09   |
 ;________________________________________________________________________|
 
@@ -24,6 +24,7 @@
                                           :db/isComponent true
                                           :db/cardinality :db.cardinality/many}
                           :task/creator {:db/valueType :db.type/ref}}))
+
 
 
 (d/transact! conn [{:db/id         -1
@@ -207,6 +208,5 @@
 ;__________________________________________________________|
 
 (om/add-root! reconciler App (gdom/getElement "app"))
-
 
 
